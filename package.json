@@ -1,0 +1,16 @@
+{
+  "name": "dramado",
+  "version": "1.0.0",
+  "description": "DramaDo - Productivity, Dramatically!",
+  "scripts": {
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "build": "cd client && npm run build"
+  },
+  "keywords": ["mern", "task-management", "productivity"],
+  "author": "Team DramaDo",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
