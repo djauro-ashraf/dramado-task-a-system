@@ -9,7 +9,6 @@ A MERN stack web application that transforms task management into a dramatic, in
 
 ## 📋 Features
 
-
 ### Core Features
 - ✅ **User Authentication** - JWT-based login/register + Google OAuth
 
