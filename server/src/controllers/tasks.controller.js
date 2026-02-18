@@ -109,9 +109,12 @@ const snoozeTask = asyncHandler(async (req, res) => {
   const { minutes } = req.body;
   const { task, user } = await tasksService.snoozeTask(req.user.id, req.params.id, minutes);
 
+  const m = Number(minutes);
+  const label = m < 1 ? `${Math.round(m * 60)} seconds` : `${m} minutes`;
+
   res.json({
     success: true,
-    message: `⏰ Snoozed for ${minutes} minutes. The drama postponed!`,
+    message: `⏰ Snoozed for ${label}. The drama postponed!`,
     data: {
       task,
       user: {

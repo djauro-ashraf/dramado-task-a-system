@@ -33,7 +33,10 @@ export default function useAlarmEngine(tasks, onAlarm) {
 
   const enableAudio = () => {
     if (!audioRef.current) {
-      audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBitr0/PTgjMGHm7A7+OZSA0PVqzn77BiFwtDmuD0wXMpBSxw0/PWhzUGGWm98M+gUBUNTKXk8LJkGAg+k9nyyoM4BTJ+zfDajzsIGGS57uynUxYMSqHi8bllGAg8l9ryz4I2BTJ80fDaijwIH2q+8OScTQ');
+      // Put your audio file here: client/public/alarms/alarm.mp3
+      // Then it will be served at /alarms/alarm.mp3
+      audioRef.current = new Audio('/alarms/alarm.mp3');
+      audioRef.current.preload = 'auto';
     }
     setAudioEnabled(true);
   };

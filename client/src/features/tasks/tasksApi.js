@@ -7,25 +7,26 @@ export default {
   },
   createTask: async (taskData) => {
     const { data } = await axios.post('/tasks', taskData);
-    return data.data.task;
+    return { task: data.data.task, message: data.message };
   },
   updateTask: async (id, updates) => {
     const { data } = await axios.patch(`/tasks/${id}`, updates);
-    return data.data.task;
+    return { task: data.data.task, message: data.message };
   },
   deleteTask: async (id) => {
-    await axios.delete(`/tasks/${id}`);
+    const { data } = await axios.delete(`/tasks/${id}`);
+    return { message: data.message };
   },
   completeTask: async (id) => {
     const { data } = await axios.post(`/tasks/${id}/complete`);
-    return data.data;
+    return { ...data.data, message: data.message };
   },
   snoozeTask: async (id, minutes) => {
     const { data } = await axios.post(`/tasks/${id}/snooze`, { minutes });
-    return data.data;
+    return { ...data.data, message: data.message };
   },
   ignoreTask: async (id) => {
     const { data } = await axios.post(`/tasks/${id}/ignore`);
-    return data.data;
+    return { ...data.data, message: data.message };
   }
 };

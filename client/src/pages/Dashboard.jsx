@@ -9,16 +9,34 @@ import tasksApi from '../features/tasks/tasksApi';
 import useAlarmEngine from '../features/tasks/useAlarmEngine';
 import { toast } from '../ui/Toast';
 
+function DramaBanner({ message }) {
+  if (!message) return null;
+  return (
+    <div className="drama-banner" role="status" aria-live="polite">
+      {message}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user, updateUser } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [alarmTask, setAlarmTask] = useState(null);
+  const [activityRefresh, setActivityRefresh] = useState(0);
+  const [dramaMessage, setDramaMessage] = useState('');
   
-  const { audioEnabled, enableAudio } = useAlarmEngine(tasks, (task) => {
+  const { audioEnabled, enableAudio, resetFired } = useAlarmEngine(tasks, (task) => {
     setAlarmTask(task);
   });
+
+  const flashDrama = (msg) => {
+    if (!msg) return;
+    setDramaMessage(msg);
+    window.clearTimeout(flashDrama._t);
+    flashDrama._t = window.setTimeout(() => setDramaMessage(''), 2200);
+  };
 
   useEffect(() => {
     loadTasks();
@@ -37,10 +55,12 @@ export default function Dashboard() {
 
   const handleCreateTask = async (taskData) => {
     try {
-      await tasksApi.createTask(taskData);
-      toast.success('🎭 Task created! The drama begins!');
+      const res = await tasksApi.createTask(taskData);
+      toast.success(res.message || '🎭 Task created!');
+      flashDrama(res.message);
       setShowForm(false);
       loadTasks();
+      setActivityRefresh((x) => x + 1);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create task');
     }
@@ -48,11 +68,15 @@ export default function Dashboard() {
 
   const handleCompleteTask = async (id) => {
     try {
-      const { user: updatedUser } = await tasksApi.completeTask(id);
+      const res = await tasksApi.completeTask(id);
+      const { user: updatedUser } = res;
       updateUser(updatedUser);
-      toast.success('✅ Task completed!');
+      toast.success(res.message || '✅ Task completed!');
+      flashDrama(res.message);
+      resetFired(id);
       setAlarmTask(null);
       loadTasks();
+      setActivityRefresh((x) => x + 1);
     } catch (error) {
       toast.error('Failed to complete task');
     }
@@ -60,11 +84,15 @@ export default function Dashboard() {
 
   const handleSnoozeTask = async (id, minutes) => {
     try {
-      const { user: updatedUser } = await tasksApi.snoozeTask(id, minutes);
+      const res = await tasksApi.snoozeTask(id, minutes);
+      const { user: updatedUser } = res;
       updateUser(updatedUser);
-      toast.success(`⏰ Snoozed for ${minutes} minutes`);
+      toast.success(res.message || `⏰ Snoozed`);
+      flashDrama(res.message);
+      resetFired(id);
       setAlarmTask(null);
       loadTasks();
+      setActivityRefresh((x) => x + 1);
     } catch (error) {
       toast.error('Failed to snooze task');
     }
@@ -72,11 +100,15 @@ export default function Dashboard() {
 
   const handleIgnoreTask = async (id) => {
     try {
-      const { user: updatedUser } = await tasksApi.ignoreTask(id);
+      const res = await tasksApi.ignoreTask(id);
+      const { user: updatedUser } = res;
       updateUser(updatedUser);
-      toast.success('🙈 Task ignored!');
+      toast.success(res.message || '🙈 Task ignored!');
+      flashDrama(res.message);
+      resetFired(id);
       setAlarmTask(null);
       loadTasks();
+      setActivityRefresh((x) => x + 1);
     } catch (error) {
       toast.error('Failed to ignore task');
     }
@@ -85,9 +117,12 @@ export default function Dashboard() {
   const handleDeleteTask = async (id) => {
     if (!window.confirm('Delete this task?')) return;
     try {
-      await tasksApi.deleteTask(id);
-      toast.success('🗑️ Task deleted!');
+      const res = await tasksApi.deleteTask(id);
+      toast.success(res?.message || '🗑️ Task deleted!');
+      flashDrama(res?.message);
+      resetFired(id);
       loadTasks();
+      setActivityRefresh((x) => x + 1);
     } catch (error) {
       toast.error('Failed to delete task');
     }
@@ -101,6 +136,7 @@ export default function Dashboard() {
   return (
     <>
       <Navbar />
+      <DramaBanner message={dramaMessage} />
       <div className="dashboard">
         <div className="container">
           <div className="dashboard-header">
@@ -151,7 +187,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          <ActivityTimeline />
+          <ActivityTimeline refreshToken={activityRefresh} />
         </div>
       </div>
 

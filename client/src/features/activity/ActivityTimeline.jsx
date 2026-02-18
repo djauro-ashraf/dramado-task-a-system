@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import activityApi from './activityApi';
 
-export default function ActivityTimeline() {
+export default function ActivityTimeline({ refreshToken = 0 }) {
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadActivities();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
 
   const loadActivities = async () => {
     try {
@@ -43,12 +44,8 @@ export default function ActivityTimeline() {
             <div className="stat-label">Snoozed</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{stats.tasksIgnored}</div>
-            <div className="stat-label">Ignored</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{stats.missedDeadlines}</div>
-            <div className="stat-label">Missed Deadlines</div>
+            <div className="stat-value">{(stats.tasksIgnored || 0) + (stats.missedDeadlines || 0)}</div>
+            <div className="stat-label">Missed</div>
           </div>
         </div>
       )}

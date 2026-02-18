@@ -434,7 +434,7 @@ input:focus, textarea:focus, select:focus {
 
 .snooze-options {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
   gap: 10px;
   margin-bottom: 15px;
 }
@@ -493,6 +493,34 @@ input:focus, textarea:focus, select:focus {
 
 .toast.error {
   border-left: 4px solid var(--danger);
+}
+
+/* Drama banner (quick highlight above everything) */
+.drama-banner {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2500;
+  background: var(--bg-light);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 16px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  max-width: min(720px, calc(100vw - 24px));
+  text-align: center;
+  animation: dramaPop 0.22s ease-out;
+}
+
+@keyframes dramaPop {
+  from {
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Responsive */
