@@ -10,7 +10,7 @@ http://localhost:5000/api
 ## 1. Authentication Endpoints
 
 ### Register New User
-```http
+```http 
 POST /auth/register
 Content-Type: application/json
 
