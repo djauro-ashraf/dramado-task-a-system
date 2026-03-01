@@ -7,7 +7,7 @@ const ApiError = require('../utils/ApiError');
 const errorHandler = (err, req, res, next) => {
   let error = err;
 
-  // Convert non-ApiError errors to ApiError
+  // Convert non-ApiError errors to ApiError 
   if (!(error instanceof ApiError)) {
     const statusCode = error.statusCode || 500;
     const message = error.message || 'Internal Server Error';
