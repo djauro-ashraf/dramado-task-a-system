@@ -72,7 +72,7 @@ taskSchema.methods.shouldTriggerAlarm = function() {
   // Check if snoozed
   if (this.snoozedUntil && now < this.snoozedUntil) {
     return false;
-  }
+   }
   
   return now >= this.alarmTime;
 };
