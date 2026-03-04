@@ -183,8 +183,13 @@ const snoozeTask = async (userId, taskId, minutes) => {
     throw ApiError.badRequest('Cannot snooze completed task');
   }
 
-  // Calculate snooze time
-  const snoozedUntil = new Date(Date.now() + minutes * 60 * 1000);
+  const mins = Number(minutes);
+  if (!Number.isFinite(mins) || mins <= 0) {
+    throw ApiError.badRequest('Invalid snooze duration');
+  }
+
+  // Calculate snooze time (supports fractional minutes)
+  const snoozedUntil = new Date(Date.now() + mins * 60 * 1000);
   task.snoozedUntil = snoozedUntil;
   await task.save();
 
@@ -207,7 +212,7 @@ const snoozeTask = async (userId, taskId, minutes) => {
     task._id,
     'SNOOZED',
     message,
-    { minutes, snoozeCount: snoozeCount + 1 }
+    { minutes: mins, snoozeCount: snoozeCount + 1 }
   );
 
   return { task, user };

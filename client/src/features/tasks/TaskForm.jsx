@@ -35,6 +35,9 @@ export default function TaskForm({ onSubmit, onCancel }) {
   const deadlineTimeRef = useRef(null);
   const alarmTimeRef = useRef(null);
 
+  const [deadlineQuickMsg, setDeadlineQuickMsg] = useState('');
+  const [alarmQuickMsg, setAlarmQuickMsg] = useState('');
+
   const minDate = useMemo(() => todayYMD(), []);
   const minTimeToday = useMemo(() => nowHM(), []);
 
@@ -54,9 +57,37 @@ export default function TaskForm({ onSubmit, onCancel }) {
     setTimeout(() => deadlineTimeRef.current?.focus(), 0);
   };
 
+  const setDeadlineEndOfDay = () => {
+    if (!formData.deadlineDate) {
+      setDeadlineQuickMsg('Not set');
+      return;
+    }
+    setDeadlineQuickMsg('');
+    setFormData((p) => ({ ...p, deadlineTime: '23:59' }));
+    setTimeout(() => deadlineTimeRef.current?.focus(), 0);
+  };
+
   const setAlarmToday = () => {
     const d = todayYMD();
     setFormData((p) => ({ ...p, alarmDate: d }));
+    setTimeout(() => alarmTimeRef.current?.focus(), 0);
+  };
+
+  const setAlarmAutoTwoHoursBeforeDeadline = () => {
+    if (!formData.deadlineTime) {
+      setAlarmQuickMsg('Not set');
+      return;
+    }
+    setAlarmQuickMsg('');
+    const [hh, mm] = formData.deadlineTime.split(':').map(Number);
+    if (Number.isNaN(hh) || Number.isNaN(mm)) {
+      setAlarmQuickMsg('Not set');
+      return;
+    }
+    const total = (hh * 60 + mm - 120 + 24 * 60) % (24 * 60);
+    const outH = Math.floor(total / 60);
+    const outM = total % 60;
+    setFormData((p) => ({ ...p, alarmTime: `${pad(outH)}:${pad(outM)}` }));
     setTimeout(() => alarmTimeRef.current?.focus(), 0);
   };
 
@@ -139,15 +170,34 @@ export default function TaskForm({ onSubmit, onCancel }) {
           </div>
 
           <div style={{ marginTop: 8 }}>
-            <input
-              ref={deadlineTimeRef}
-              type="time"
-              value={formData.deadlineTime}
-              min={deadlineMinTime}
-              step={60}
-              onChange={(e) => setFormData({ ...formData, deadlineTime: e.target.value })}
-              style={{ width: "100%" }}
-            />
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                ref={deadlineTimeRef}
+                type="time"
+                value={formData.deadlineTime}
+                min={deadlineMinTime}
+                step={60}
+                onChange={(e) => {
+                  setDeadlineQuickMsg('');
+                  setFormData({ ...formData, deadlineTime: e.target.value });
+                }}
+                style={{ flex: 1 }}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={setDeadlineEndOfDay}
+                disabled={!formData.deadlineDate}
+                title={!formData.deadlineDate ? 'Deadline date not set' : 'Set 11:59 PM'}
+              >
+                {!formData.deadlineDate ? 'Not set' : '11:59 PM'}
+              </button>
+            </div>
+            {deadlineQuickMsg && (
+              <div style={{ marginTop: 6, color: 'var(--text-dim)', fontSize: 12 }}>
+                {deadlineQuickMsg}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -169,15 +219,33 @@ export default function TaskForm({ onSubmit, onCancel }) {
         </div>
 
         <div style={{ marginTop: 8 }}>
-          <input
-            ref={alarmTimeRef}
-            type="time"
-            value={formData.alarmTime}
-            min={alarmMinTime}
-            step={60}
-            onChange={(e) => setFormData({ ...formData, alarmTime: e.target.value })}
-            style={{ width: "100%" }}
-          />
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input
+              ref={alarmTimeRef}
+              type="time"
+              value={formData.alarmTime}
+              min={alarmMinTime}
+              step={60}
+              onChange={(e) => {
+                setAlarmQuickMsg('');
+                setFormData({ ...formData, alarmTime: e.target.value });
+              }}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={setAlarmAutoTwoHoursBeforeDeadline}
+              title={!formData.deadlineTime ? 'Deadline time not set' : 'Set to 2 hours before deadline time'}
+            >
+              {!formData.deadlineTime ? 'Not set' : 'Auto (-2h)'}
+            </button>
+          </div>
+          {alarmQuickMsg && (
+            <div style={{ marginTop: 6, color: 'var(--text-dim)', fontSize: 12 }}>
+              {alarmQuickMsg}
+            </div>
+          )}
         </div>
       </div>
 

@@ -62,11 +62,11 @@ const updateTaskSchema = Joi.object({
 
 const snoozeSchema = Joi.object({
   minutes: Joi.number()
-    .valid(5, 10, 15, 30)
+    .valid(0.5, 1, 5, 10, 15, 30)
     .required()
     .messages({
       'any.required': 'Snooze duration is required',
-      'any.only': 'Snooze duration must be 5, 10, 15, or 30 minutes'
+      'any.only': 'Snooze duration must be 30s, 1, 5, 10, 15, or 30 minutes'
     })
 });
 

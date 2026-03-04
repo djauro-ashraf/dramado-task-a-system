@@ -3,7 +3,13 @@ import Modal from '../../ui/Modal';
 export default function AlarmModal({ task, onComplete, onSnooze, onIgnore }) {
   if (!task) return null;
 
-  const snoozeDurations = [5, 10, 15, 30];
+  // minutes (supports fractional minutes for demo)
+  const snoozeDurations = [0.5, 1, 5, 10, 15, 30];
+
+  const labelFor = (min) => {
+    if (min < 1) return `${Math.round(min * 60)}s`;
+    return `${min}m`;
+  };
 
   return (
     <Modal isOpen={!!task} onClose={() => {}}>
@@ -19,7 +25,7 @@ export default function AlarmModal({ task, onComplete, onSnooze, onIgnore }) {
           <div className="snooze-options">
             {snoozeDurations.map(min => (
               <button key={min} onClick={() => onSnooze(task._id, min)} className="btn btn-secondary btn-small">
-                {min}m
+                {labelFor(min)}
               </button>
             ))}
           </div>

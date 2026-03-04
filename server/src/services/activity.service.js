@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const ActivityLog = require('../models/ActivityLog.model');
 
 /**
@@ -37,7 +38,7 @@ const getUserActivities = async (userId, limit = 50, skip = 0) => {
  */
 const getActivityStats = async (userId) => {
   const stats = await ActivityLog.aggregate([
-    { $match: { userId: userId } },
+    { $match: { userId: new mongoose.Types.ObjectId(userId) } },
     {
       $group: {
         _id: '$type',

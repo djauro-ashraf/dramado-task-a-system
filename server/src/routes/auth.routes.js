@@ -33,35 +33,49 @@ router.get('/me', authenticate, authController.getCurrentUser);
 router.post('/logout', authenticate, authController.logout);
 
 // Google OAuth routes
-if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
-  // Initiate Google OAuth
-  router.get(
-    '/google',
-    passport.authenticate('google', { 
-      scope: ['profile', 'email'],
-      session: false 
-    })
-  );
+// NOTE: We always register these routes so the API doesn't 404 when Google isn't configured.
+// If env vars are missing, we return a helpful error instead.
 
-  // Google OAuth callback
-  router.get(
-    '/google/callback',
-    passport.authenticate('google', { 
-      session: false,
-      failureRedirect: `${config.CLIENT_URL}/login?error=oauth_failed`
-    }),
-    async (req, res) => {
-      try {
-        // Generate JWT for the authenticated user
-        const token = authService.generateToken(req.user._id);
-        
-        // Redirect to client with token
-        res.redirect(`${config.CLIENT_URL}/auth/callback?token=${token}`);
-      } catch (error) {
-        res.redirect(`${config.CLIENT_URL}/login?error=oauth_failed`);
-      }
+// Initiate Google OAuth
+router.get('/google', (req, res, next) => {
+  if (!config.GOOGLE_CLIENT_ID || !config.GOOGLE_CLIENT_SECRET) {
+    return res.status(500).json({
+      success: false,
+      message:
+        'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server/.env, then restart the server.'
+    });
+  }
+
+  return passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false
+  })(req, res, next);
+});
+
+// Google OAuth callback
+router.get('/google/callback', (req, res, next) => {
+  if (!config.GOOGLE_CLIENT_ID || !config.GOOGLE_CLIENT_SECRET) {
+    return res.status(500).json({
+      success: false,
+      message:
+        'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server/.env, then restart the server.'
+    });
+  }
+
+  return passport.authenticate('google', {
+    session: false,
+    failureRedirect: `${config.CLIENT_URL}/login?error=oauth_failed`
+  })(req, res, async (err) => {
+    if (err) {
+      return res.redirect(`${config.CLIENT_URL}/login?error=oauth_failed`);
     }
-  );
-}
+    try {
+      const token = authService.generateToken(req.user._id);
+      return res.redirect(`${config.CLIENT_URL}/auth/callback?token=${token}`);
+    } catch (error) {
+      return res.redirect(`${config.CLIENT_URL}/login?error=oauth_failed`);
+    }
+  });
+});
 
 module.exports = router;
