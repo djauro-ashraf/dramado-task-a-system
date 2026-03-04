@@ -27,6 +27,6 @@ const getActivities = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = {
+module.exports =  {
   getActivities
 };
