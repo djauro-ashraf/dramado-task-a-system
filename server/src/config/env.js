@@ -22,4 +22,4 @@ module.exports = {
   // File Upload
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
   ALLOWED_AUDIO_TYPES: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3']
-};
+  };
