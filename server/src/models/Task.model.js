@@ -43,6 +43,18 @@ const taskSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  alarmDurationMinutes: {
+    type: Number,
+    default: 5
+  },
+  missedAlarmAt: {
+    type: Date,
+    default: null
+  },
+  missedAlarmCount: {
+    type: Number,
+    default: 0
+  },
   completedAt: {
     type: Date,
     default: null
@@ -72,7 +84,7 @@ taskSchema.methods.shouldTriggerAlarm = function() {
   // Check if snoozed
   if (this.snoozedUntil && now < this.snoozedUntil) {
     return false;
-   }
+  }
   
   return now >= this.alarmTime;
 };

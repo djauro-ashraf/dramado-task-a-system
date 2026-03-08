@@ -20,5 +20,6 @@ router.delete('/:id', tasksController.deleteTask);
 router.post('/:id/complete', tasksController.completeTask);
 router.post('/:id/snooze', validate(snoozeSchema), tasksController.snoozeTask);
 router.post('/:id/ignore', tasksController.ignoreTask);
+router.post('/:id/missed-alarm', tasksController.missedAlarm);
 
 module.exports = router;

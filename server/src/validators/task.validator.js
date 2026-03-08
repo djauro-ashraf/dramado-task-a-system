@@ -1,5 +1,10 @@
 const Joi = require('joi');
 
+const customAlarmUrlSchema = Joi.alternatives().try(
+  Joi.string().uri(),
+  Joi.string().pattern(/^\/uploads\/alarms\/[A-Za-z0-9._-]+$/)
+).allow(null, '');
+
 const createTaskSchema = Joi.object({
   title: Joi.string()
     .min(1)
@@ -25,9 +30,10 @@ const createTaskSchema = Joi.object({
     .iso()
     .allow(null)
     .optional(),
-  customAlarmUrl: Joi.string()
-    .uri()
-    .allow(null)
+  customAlarmUrl: customAlarmUrlSchema.optional(),
+  alarmDurationMinutes: Joi.number()
+    .min(0.5)
+    .max(30)
     .optional()
 });
 
@@ -51,9 +57,10 @@ const updateTaskSchema = Joi.object({
     .iso()
     .allow(null)
     .optional(),
-  customAlarmUrl: Joi.string()
-    .uri()
-    .allow(null)
+  customAlarmUrl: customAlarmUrlSchema.optional(),
+  alarmDurationMinutes: Joi.number()
+    .min(0.5)
+    .max(30)
     .optional(),
   status: Joi.string()
     .valid('todo', 'done', 'overdue')

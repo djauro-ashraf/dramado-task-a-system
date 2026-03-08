@@ -7,13 +7,15 @@ const asyncHandler = require('../utils/asyncHandler');
  */
 const getActivities = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
-  const skip = parseInt(req.query.skip) || 0;
+  const skip  = parseInt(req.query.skip)  || 0;
+  const type  = req.query.type || null;
 
-  const activities = await activityService.getUserActivities(
-    req.user.id,
-    limit,
-    skip
-  );
+  let activities = await activityService.getUserActivities(req.user.id, limit, skip);
+
+  if (type) {
+    const types = type.split(',');
+    activities = activities.filter(a => types.includes(a.type));
+  }
 
   const stats = await activityService.getActivityStats(req.user.id);
 
@@ -27,6 +29,6 @@ const getActivities = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports =  {
+module.exports = {
   getActivities
 };

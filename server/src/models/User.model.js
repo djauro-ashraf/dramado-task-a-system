@@ -39,20 +39,21 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Virtual for mood calculation
+// Virtual for mood calculation — based on NET score (discipline - chaos)
 userSchema.virtual('mood').get(function() {
   const { disciplineScore, chaosScore } = this;
-  
-  if (disciplineScore >= 20 && chaosScore < 10) {
-    return 'heroic';
-  } else if (disciplineScore >= 10) {
-    return 'focused';
-  } else if (chaosScore >= 15) {
-    return 'chaotic';
-  } else if (chaosScore >= 8 && disciplineScore < 8) {
-    return 'struggling';
-  }
+  const net = disciplineScore - chaosScore;
+
+  if (net >= 15 && chaosScore < 5)  return 'heroic';
+  if (net >= 6)                     return 'focused';
+  if (net <= -10)                   return 'chaotic';
+  if (net <= -3)                    return 'struggling';
   return 'neutral';
+});
+
+// Virtual for chaos-lock gate (net score <= -10 triggers game lockout)
+userSchema.virtual('isChaosLocked').get(function() {
+  return (this.disciplineScore - this.chaosScore) <= -10;
 });
 
 // Method to compare password

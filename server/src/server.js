@@ -1,9 +1,13 @@
 const app = require('./app');
 const connectDB = require('./config/db');
 const config = require('./config/env');
+const { startAlarmScheduler } = require('./services/alarmScheduler');
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(() => {
+  // Start background alarm scheduler AFTER DB is ready
+  startAlarmScheduler();
+});
 
 // Start server
 const PORT = config.PORT;

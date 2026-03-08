@@ -21,5 +21,10 @@ module.exports = {
   
   // File Upload
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
-  ALLOWED_AUDIO_TYPES: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3']
-  };
+  ALLOWED_AUDIO_TYPES: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3'],
+
+  // Web Push (VAPID) — generate with: npx web-push generate-vapid-keys
+  VAPID_PUBLIC_KEY:  process.env.VAPID_PUBLIC_KEY  || '',
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || '',
+  VAPID_EMAIL:       process.env.VAPID_EMAIL        || 'admin@dramado.app'
+};

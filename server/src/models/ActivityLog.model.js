@@ -20,6 +20,7 @@ const activityLogSchema = new mongoose.Schema({
       'SNOOZED',
       'IGNORED',
       'MISSED_DEADLINE',
+      'MISSED_ALARM',
       'LOGIN',
       'UPLOAD_SOUND',
       'UPDATED_TASK',

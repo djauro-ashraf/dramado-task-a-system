@@ -3,6 +3,7 @@ const User = require('../models/User.model');
 const ApiError = require('../utils/ApiError');
 const activityService = require('./activity.service');
 const dramaService = require('./drama.service');
+const { onTaskSnoozed } = require('./alarmScheduler');
 
 /**
  * Create a new task
@@ -74,16 +75,32 @@ const updateTask = async (userId, taskId, updates) => {
     throw ApiError.notFound('Task not found');
   }
 
+  // Completed tasks cannot be edited
+  if (task.status === 'done') {
+    throw ApiError.badRequest('Completed tasks cannot be edited');
+  }
+
   Object.assign(task, updates);
+
+  // If task was overdue and the new deadline is now in the future, restore to todo
+  if (task.status === 'overdue' && task.deadline) {
+    if (new Date(task.deadline) > new Date()) {
+      task.status = 'todo';
+    }
+  }
+  // Also: if deadline is cleared entirely on an overdue task, restore to todo
+  if (task.status === 'overdue' && !task.deadline) {
+    task.status = 'todo';
+  }
+
   await task.save();
 
-  // Log activity
   await activityService.logActivity(
     userId,
     task._id,
     'UPDATED_TASK',
-    `📝 Task "${task.title}" updated. The plot evolves!`,
-    { updates: Object.keys(updates) }
+    `📝 Task "${task.title}" updated. The plot evolves — or at least pivots!`,
+    { updates: Object.keys(updates), newStatus: task.status }
   );
 
   return task;
@@ -192,6 +209,9 @@ const snoozeTask = async (userId, taskId, minutes) => {
   const snoozedUntil = new Date(Date.now() + mins * 60 * 1000);
   task.snoozedUntil = snoozedUntil;
   await task.save();
+
+  // Clear from scheduler's pushed set so the push re-fires when snooze expires
+  onTaskSnoozed(taskId);
 
   // Update user chaos score
   const user = await User.findById(userId);
@@ -302,6 +322,46 @@ const checkOverdueTasks = async (userId) => {
   return overdueTasks.length;
 };
 
+/**
+ * Record a missed alarm (alarm period expired without user action)
+ */
+const missedAlarm = async (userId, taskId) => {
+  const task = await Task.findOne({ _id: taskId, userId });
+
+  if (!task) {
+    throw ApiError.notFound('Task not found');
+  }
+
+  if (task.status === 'done') {
+    return { task, user: await User.findById(userId) }; // already handled
+  }
+
+  // Track missed alarm
+  task.missedAlarmAt = new Date();
+  task.missedAlarmCount = (task.missedAlarmCount || 0) + 1;
+  // Clear alarm so it doesn't re-fire immediately — task stays as todo
+  task.alarmTime = null;
+  task.snoozedUntil = null;
+  await task.save();
+
+  // Heavy chaos penalty for missing alarm
+  const user = await User.findById(userId);
+  user.chaosScore += 3;
+  await user.save();
+
+  const message = dramaService.generateMissedAlarmMessage(task.priority, task.missedAlarmCount);
+
+  await activityService.logActivity(
+    userId,
+    task._id,
+    'MISSED_ALARM',
+    message,
+    { priority: task.priority, missedAlarmCount: task.missedAlarmCount, chaosGained: 3 }
+  );
+
+  return { task, user };
+};
+
 module.exports = {
   createTask,
   getUserTasks,
@@ -311,5 +371,6 @@ module.exports = {
   completeTask,
   snoozeTask,
   ignoreTask,
-  checkOverdueTasks
+  checkOverdueTasks,
+  missedAlarm
 };

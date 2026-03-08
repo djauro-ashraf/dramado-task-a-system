@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth.routes');
 const tasksRoutes = require('./routes/tasks.routes');
 const activityRoutes = require('./routes/activity.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const pushRoutes = require('./routes/push.routes');
 
 // Import middleware
 const { errorHandler, notFound, handleMongooseError } = require('./middleware/error.middleware');
@@ -57,6 +58,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/push', pushRoutes);
 
 // Handle Mongoose errors
 app.use(handleMongooseError);

@@ -28,5 +28,17 @@ export default {
   ignoreTask: async (id) => {
     const { data } = await axios.post(`/tasks/${id}/ignore`);
     return { ...data.data, message: data.message };
+  },
+  missedAlarm: async (id) => {
+    const { data } = await axios.post(`/tasks/${id}/missed-alarm`);
+    return { ...data.data, message: data.message };
+  },
+  uploadAlarm: async (file) => {
+    const formData = new FormData();
+    formData.append('alarm', file);
+    const { data } = await axios.post('/upload/alarm', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data.data;
   }
 };
