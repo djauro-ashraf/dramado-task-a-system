@@ -5,8 +5,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
       cache.addAll(['/alarms/alarm.mp3'])
-    )
-  );
+     )
+   );
 });
 
 self.addEventListener('activate', (event) => {
