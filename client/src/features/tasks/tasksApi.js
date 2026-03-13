@@ -40,5 +40,5 @@ export default {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return data.data;
-  }
+   }
 };
