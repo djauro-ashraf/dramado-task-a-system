@@ -49,7 +49,7 @@ const subscribeToPush = async () => {
   await axios.post('/push/subscribe', { endpoint, keys });
 
   return 'granted';
-};
+ };
 
 const unsubscribeFromPush = async () => {
   if (!('serviceWorker' in navigator)) return;
